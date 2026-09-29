@@ -1,0 +1,21 @@
+# 認証情報（API キー）
+.env
+.env.*
+!.env.example
+
+# 依存パッケージ
+node_modules/
+
+# ビルド成果物
+dist/
+build/
+
+# ログ・OS / エディタ生成ファイル
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+
+# 実際の家計データ・レシート画像
+data/
+receipts/

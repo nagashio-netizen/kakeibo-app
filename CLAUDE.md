@@ -6,7 +6,23 @@
 
 家計簿アプリ（kakeibo-app）。日々の収入・支出を記録し、カテゴリ別・月別に集計・可視化することを目的とします。
 
-> 技術スタック・ディレクトリ構成・ビルド/テストコマンドは、実装が進んだ時点でこのファイルに追記してください。
+## 技術スタック
+
+- フロントエンド: React 19 + Vite、Chart.js（react-chartjs-2）… `client/`
+- バックエンド: Node.js + Express、Anthropic SDK（`@anthropic-ai/sdk`）… `server/`
+- レシート読み取りモデル: `claude-haiku-4-5`（構造化出力で JSON を受け取る）
+- データ保存: ブラウザのローカルストレージ（キー `kakeibo.receipts`）
+- API キーはルートの `.env`（`ANTHROPIC_API_KEY`）で管理し、バックエンドからのみ使用する
+
+## コマンド
+
+- `npm run install:all` … ルート・server・client の依存をインストール
+- `npm run dev` … バックエンド（:3001）とフロントエンド（:5173）を同時起動
+- `npm run build` … フロントエンドをビルド
+
+## 実装上の注意
+
+- カテゴリ一覧は `server/receipt.js` と `client/src/categories.js` の両方で定義しているため、変更時は揃える
 
 ## 開発方針
 
