@@ -1,8 +1,9 @@
 // 表示用のフォーマット関数
 
-// 金額（整数・円）を「¥1,234」形式にする
+// 金額（整数・円）を「¥1,234」形式にする（負の値は「-¥100」）
 export function formatYen(amount) {
-  return `¥${amount.toLocaleString('ja-JP')}`;
+  const sign = amount < 0 ? '-' : '';
+  return `${sign}¥${Math.abs(amount).toLocaleString('ja-JP')}`;
 }
 
 // YYYY-MM-DD から YYYY-MM（月キー）を取り出す

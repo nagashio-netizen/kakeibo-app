@@ -1,8 +1,9 @@
 import { CATEGORY_NAMES } from '../categories.js';
 import { formatYen, receiptTotal } from '../format.js';
+import { validateReceipt } from '../validation.js';
 
 // 読み取り結果を確認・修正してから保存するフォーム
-export default function ReceiptEditor({ draft, onChange, onSave, onCancel }) {
+export default function ReceiptEditor({ draft, receipts, onChange, onSave, onCancel }) {
   const updateItem = (index, patch) => {
     const items = draft.items.map((item, i) => (i === index ? { ...item, ...patch } : item));
     onChange({ ...draft, items });
@@ -23,6 +24,9 @@ export default function ReceiptEditor({ draft, onChange, onSave, onCancel }) {
   };
 
   const canSave = draft.date && draft.items.length > 0;
+
+  // 入力内容が変わるたびに検証し、警告を表示する（保存は妨げない）
+  const { negativeIndexes, messages } = validateReceipt(draft, receipts);
 
   return (
     <section className="card editor">
@@ -63,7 +67,7 @@ export default function ReceiptEditor({ draft, onChange, onSave, onCancel }) {
           </thead>
           <tbody>
             {draft.items.map((item, i) => (
-              <tr key={i}>
+              <tr key={i} className={negativeIndexes.includes(i) ? 'is-negative' : undefined}>
                 <td>
                   <input
                     type="text"
@@ -108,6 +112,14 @@ export default function ReceiptEditor({ draft, onChange, onSave, onCancel }) {
           </tfoot>
         </table>
       </div>
+
+      {messages.length > 0 && (
+        <ul className="warning validation-list" role="alert">
+          {messages.map((message) => (
+            <li key={message}>{message}</li>
+          ))}
+        </ul>
+      )}
 
       <div className="actions">
         <button type="button" className="secondary" onClick={addItem}>

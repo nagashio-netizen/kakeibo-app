@@ -334,3 +334,14 @@ select {
 .receipt-list details[open] {
   padding-bottom: 12px;
 }
+
+/* 検証警告 */
+.validation-list {
+  margin: 12px 0 0;
+  padding: 8px 10px 8px 28px;
+}
+
+.items-table tr.is-negative input {
+  border-color: var(--warning-text);
+  background: var(--warning-bg);
+}

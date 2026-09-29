@@ -101,6 +101,7 @@ export default function App() {
           {draft && (
             <ReceiptEditor
               draft={draft}
+              receipts={receipts}
               onChange={setDraft}
               onSave={handleSave}
               onCancel={() => setDraft(null)}
