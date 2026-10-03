@@ -123,6 +123,7 @@ export default function ReceiptUploader({ onAnalyzed, onManual, disabled }) {
           {loading ? '読み取り中…' : 'Claude で読み取る'}
         </button>
       </div>
+      {!file && !disabled && <p className="hint">レシート画像を選択すると「Claude で読み取る」が押せるようになります。</p>}
       {disabled && <p className="hint">読み取った内容を保存または破棄してから、次のレシートを読み込めます。</p>}
     </section>
   );
