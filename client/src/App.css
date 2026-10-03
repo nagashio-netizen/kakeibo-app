@@ -345,3 +345,10 @@ select {
   border-color: var(--warning-text);
   background: var(--warning-bg);
 }
+
+/* 読み取れなかった・要確認の欄 */
+input.needs-review,
+select.needs-review {
+  border-color: var(--warning-text);
+  background: var(--warning-bg);
+}

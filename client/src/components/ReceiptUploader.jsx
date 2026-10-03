@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 // レシート画像を選択してバックエンドに送り、読み取り結果を親に渡す
-export default function ReceiptUploader({ onAnalyzed, disabled }) {
+export default function ReceiptUploader({ onAnalyzed, onManual, disabled }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -95,8 +95,25 @@ export default function ReceiptUploader({ onAnalyzed, disabled }) {
       </div>
 
       {error && <p className="error">{error}</p>}
+      {error && !disabled && (
+        <p className="hint">
+          読み取れない場合は、レシートを見ながら手入力で登録できます。
+        </p>
+      )}
 
       <div className="actions">
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => {
+            setError('');
+            onManual();
+          }}
+          disabled={loading || disabled}
+        >
+          手入力で登録
+        </button>
+        <span className="spacer" />
         {file && !loading && (
           <button type="button" className="secondary" onClick={reset}>
             取り消し

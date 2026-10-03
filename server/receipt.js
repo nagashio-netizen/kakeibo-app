@@ -97,10 +97,9 @@ export async function analyzeReceipt(buffer, mediaType) {
     throw new ReceiptError('レシートを読み取れませんでした。別の画像でお試しください');
   }
 
+  // 商品が読み取れなかった場合もエラーにせず、利用者が手動で入力できるよう結果を返す
+  // （〜Detected が false の項目は、画面で要確認として表示される）
   const receipt = response.parsed_output;
-  if (receipt.items.length === 0) {
-    throw new ReceiptError('レシートの商品を読み取れませんでした。明るく鮮明な画像でお試しください');
-  }
 
   return {
     storeName: receipt.storeName,
@@ -111,6 +110,7 @@ export async function analyzeReceipt(buffer, mediaType) {
     items: receipt.items.map((item) => ({
       ...item,
       category: CATEGORIES.includes(item.category) ? item.category : 'その他',
+      categoryDetected: CATEGORIES.includes(item.category),
     })),
   };
 }

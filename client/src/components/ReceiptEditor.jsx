@@ -1,12 +1,23 @@
 import { CATEGORY_NAMES } from '../categories.js';
 import { formatYen, receiptTotal } from '../format.js';
 import { validateReceipt } from '../validation.js';
+import { countReviews, emptyItem } from '../draft.js';
+
+// 要確認（読み取れなかった）欄に付けるクラス
+const reviewClass = (flag) => (flag ? 'needs-review' : undefined);
 
 // 読み取り結果を確認・修正してから保存するフォーム
 export default function ReceiptEditor({ draft, receipts, onChange, onSave, onCancel }) {
+  // 修正した欄は確認済みとして要確認フラグを外す
   const updateItem = (index, patch) => {
-    const items = draft.items.map((item, i) => (i === index ? { ...item, ...patch } : item));
+    const items = draft.items.map((item, i) =>
+      i === index ? { ...item, ...patch, review: { ...item.review, [Object.keys(patch)[0]]: false } } : item,
+    );
     onChange({ ...draft, items });
+  };
+
+  const updateMeta = (patch) => {
+    onChange({ ...draft, ...patch, review: { ...draft.review, [Object.keys(patch)[0]]: false } });
   };
 
   const removeItem = (index) => {
@@ -14,7 +25,7 @@ export default function ReceiptEditor({ draft, receipts, onChange, onSave, onCan
   };
 
   const addItem = () => {
-    onChange({ ...draft, items: [...draft.items, { name: '', price: 0, category: 'その他' }] });
+    onChange({ ...draft, items: [...draft.items, emptyItem()] });
   };
 
   // 入力された金額を整数（円）に変換する
@@ -27,32 +38,50 @@ export default function ReceiptEditor({ draft, receipts, onChange, onSave, onCan
 
   // 入力内容が変わるたびに検証し、警告を表示する（保存は妨げない）
   const { negativeIndexes, messages } = validateReceipt(draft, receipts);
+  const reviewCount = countReviews(draft);
 
   return (
     <section className="card editor">
-      <h2>読み取り結果の確認</h2>
-      <p className="hint">内容を確認し、必要に応じて修正してから保存してください。</p>
+      <h2>{draft.manual ? 'レシートの手入力' : '読み取り結果の確認'}</h2>
+      <p className="hint">
+        {draft.manual
+          ? 'レシートを見ながら、店名・日付・商品を入力してください。'
+          : '内容を確認し、必要に応じて修正してから保存してください。'}
+      </p>
+      {!draft.manual && draft.itemsDetected === false && (
+        <p className="warning">商品を読み取れませんでした。レシートを見ながら商品を手入力してください。</p>
+      )}
+      {reviewCount > 0 && (
+        <p className="warning">
+          黄色の欄（{reviewCount} 件）は読み取れなかったか、確認が必要な項目です。入力・確認すると黄色が消えます。
+        </p>
+      )}
 
       <div className="editor-meta">
         <label>
           店名
           <input
             type="text"
+            className={reviewClass(draft.review?.storeName)}
             value={draft.storeName}
-            onChange={(e) => onChange({ ...draft, storeName: e.target.value })}
+            onChange={(e) => updateMeta({ storeName: e.target.value })}
           />
         </label>
         <label>
           日付
           <input
             type="date"
+            className={reviewClass(draft.review?.date)}
             value={draft.date}
-            onChange={(e) => onChange({ ...draft, date: e.target.value })}
+            onChange={(e) => updateMeta({ date: e.target.value })}
           />
         </label>
       </div>
-      {!draft.dateDetected && (
-        <p className="warning">日付を読み取れなかったため、今日の日付を入れています。</p>
+      {draft.review?.date && (
+        <p className="warning">
+          {draft.manual ? '日付は今日の日付を入れています。' : '日付を読み取れなかったため、今日の日付を入れています。'}
+          購入日に合わせて修正してください。
+        </p>
       )}
 
       <div className="table-wrap">
@@ -71,6 +100,8 @@ export default function ReceiptEditor({ draft, receipts, onChange, onSave, onCan
                 <td>
                   <input
                     type="text"
+                    className={reviewClass(item.review?.name)}
+                    placeholder="商品名"
                     value={item.name}
                     onChange={(e) => updateItem(i, { name: e.target.value })}
                   />
@@ -79,12 +110,14 @@ export default function ReceiptEditor({ draft, receipts, onChange, onSave, onCan
                   <input
                     type="number"
                     step="1"
+                    className={reviewClass(item.review?.price)}
                     value={item.price}
                     onChange={(e) => updateItem(i, { price: toYen(e.target.value) })}
                   />
                 </td>
                 <td>
                   <select
+                    className={reviewClass(item.review?.category)}
                     value={item.category}
                     onChange={(e) => updateItem(i, { category: e.target.value })}
                   >

@@ -6,6 +6,7 @@ import { CategoryPieChart, MonthlyBarChart } from './components/Charts.jsx';
 import { CATEGORIES } from './categories.js';
 import { useLocalStorage } from './hooks/useLocalStorage.js';
 import { formatMonth, formatYen, monthKey } from './format.js';
+import { draftFromResult, emptyDraft } from './draft.js';
 
 // ローカルストレージの保存キー
 const STORAGE_KEY = 'kakeibo.receipts';
@@ -58,12 +59,12 @@ export default function App() {
 
   // 読み取り結果を確認用の下書きにする
   const handleAnalyzed = (result) => {
-    setDraft({
-      storeName: result.storeName,
-      date: result.date,
-      dateDetected: result.dateDetected,
-      items: result.items,
-    });
+    setDraft(draftFromResult(result));
+  };
+
+  // 読み取りに失敗したレシートを手入力する
+  const handleManual = () => {
+    setDraft(emptyDraft());
   };
 
   // 下書きをレシートとして保存し、その月を表示する
@@ -97,7 +98,7 @@ export default function App() {
 
       <main className="layout">
         <div className="column">
-          <ReceiptUploader onAnalyzed={handleAnalyzed} disabled={draft !== null} />
+          <ReceiptUploader onAnalyzed={handleAnalyzed} onManual={handleManual} disabled={draft !== null} />
           {draft && (
             <ReceiptEditor
               draft={draft}
